@@ -131,8 +131,8 @@ const webDevTools = [
 
 const designTools = [
   { name: "Canva", image: "https://i.imgur.com/qKMRYbC.png" },
-  { name: "Adobe Photoshop", image: "https://i.imgur.com/Z42L6i2.png" },
-  { name: "Figma", image: "https://i.imgur.com/Qj1w3bB.png" },
+  { name: "Adobe Photoshop", image: "https://i.imgur.com/b5e3pj5.png" },
+  { name: "Figma", image: "https://i.imgur.com/D6UyNPW.png" },
 ];
 
 // --- Utility Functions ---

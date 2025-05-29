@@ -475,7 +475,7 @@ export default function Portfolio() {
 
         <div className="relative flex flex-col items-center gap-6 z-10">
           <motion.img
-            src="https://m.media-amazon.com/images/M/MV5BOTZhNDgwYmItMTdlZi00NDJlLWJlZWEtYmFlODE5MTBkYmIwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg"
+            src="https://i.imgur.com/EOwF6pK.jpeg"
             alt="Profile of Marl"
             className="w-48 h-64 sm:w-64 sm:h-80 object-cover mb-8 rounded-xl shadow-2xl border-4 border-cyan-500 transform hover:scale-105 transition-transform duration-500 ease-in-out"
             initial={{ opacity: 0, scale: 0.8 }}

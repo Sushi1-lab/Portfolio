@@ -305,7 +305,6 @@ export default function Portfolio() {
 
   const handleNavLinkClick = () => setIsMobileMenuOpen(false);
 
-  // --- Dark Mode Theme Colors ---
   const primaryBgColor = '#0F172A'; // Even darker slate blue for depth
   const secondaryBgColor = '#1E293B'; // Dark blue-gray for cards
   const accentColor = '#67E8F9';      // Vibrant Cyan for highlights (modern & techy)
@@ -498,7 +497,7 @@ export default function Portfolio() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.6 }}
           >
-            A passionate **Computer Science Graduate**, **UI/UX Designer**, and **Web Developer** dedicated to building modern, responsive, and user-centric applications. My expertise spans across **React**, **JavaScript**, and various other cutting-edge web technologies.
+            A passionate Computer Science Graduate, UI/UX Designer, and Web Developer dedicated to building modern, responsive, and user-centric applications. My expertise spans across React, JavaScript, and various other cutting-edge web technologies.
           </motion.p>
           <motion.div
             className="flex flex-wrap justify-center gap-5 mt-4"

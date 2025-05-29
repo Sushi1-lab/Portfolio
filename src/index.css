@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+html{
+  scroll-behavior: smooth;
+  background: linear-gradient(to bottom, #213448, #f1f5f9, #547792);
+}

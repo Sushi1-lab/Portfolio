@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { FaFacebook, FaInstagram, FaWhatsapp, FaTelegram, FaLinkedin, FaGithub, FaBars, FaTimes } from 'react-icons/fa';
 
-// --- Configuration Data (Kept separate for readability) ---
-
+// --- Configuration Data (Keeping as is) ---
 const githubRepos = [
   "https://github.com/Sushi1-lab/Invitation",
   "https://github.com/Sushi1-lab/Finance-Tracker",
@@ -92,6 +91,50 @@ const posterDesignProjects = [
   }
 ];
 
+const certifications = [
+  {
+    id: 1,
+    title: "Most Innovative Project & Study | Research Symposium",
+    image: "https://i.imgur.com/XEo2GOl.jpeg",
+    received: "2024",
+    issuer: null,
+    url: "https://i.imgur.com/XEo2GOl.jpeg",
+  },
+  {
+    id: 2,
+    title: "Penetration Testing With Ethical Hacking Training",
+    image: "https://i.imgur.com/sNSpNOI.jpeg",
+    completed: "2025",
+    issuer: "NexusCloud IT Solutions",
+    url: "https://i.imgur.com/sNSpNOI.jpeg",
+  },
+  {
+    id: 3,
+    title: "Cisco Certified Network Associate Training",
+    image: "https://i.imgur.com/3ReV0Wd.jpeg",
+    completed: "2025",
+    issuer: "NexusCloud IT Solutions",
+    url: "https://i.imgur.com/3ReV0Wd.jpeg",
+  },
+];
+
+const webDevTools = [
+  { name: "JavaScript", image: "https://i.imgur.com/fWRnBaX.png" },
+  { name: "HTML5", image: "https://i.imgur.com/p50Qdqz.png" },
+  { name: "CSS3", image: "https://i.imgur.com/R0MUf0G.png" },
+  { name: "React.js", image: "https://i.imgur.com/p84qlZF.png" },
+  { name: "Vite", image: "https://i.imgur.com/U52GWbJ.png" },
+  { name: "Tailwind CSS", image: "https://i.imgur.com/hzIN8ss.png" },
+  { name: "GitHub", image: "https://i.imgur.com/z1fScsK.png" },
+  { name: "Firebase", image: "https://i.imgur.com/PFhP5CL.png" },
+];
+
+const designTools = [
+  { name: "Canva", image: "https://i.imgur.com/qKMRYbC.png" },
+  { name: "Adobe Photoshop", image: "https://i.imgur.com/Z42L6i2.png" },
+  { name: "Figma", image: "https://i.imgur.com/Qj1w3bB.png" },
+];
+
 // --- Utility Functions ---
 function extractOwnerAndRepo(url) {
   try {
@@ -146,10 +189,84 @@ const mobileMenuVariants = {
   exit: { opacity: 0, x: "100%", transition: { type: "spring", stiffness: 120, damping: 20 } },
 };
 
+// --- Particle Canvas Component ---
+const ParticleCanvas = () => {
+  const canvasRef = useRef(null);
+  const particlesRef = useRef([]);
+
+  const createParticle = useCallback((ctx) => {
+    return {
+      x: Math.random() * ctx.canvas.width,
+      y: Math.random() * ctx.canvas.height,
+      radius: Math.random() * 1.5 + 0.5,
+      dx: (Math.random() - 0.5) * 0.5, // Slower movement
+      dy: (Math.random() - 0.5) * 0.5,
+      alpha: Math.random() * 0.7 + 0.3, // Varying transparency
+    };
+  }, []);
+
+  const drawParticles = useCallback((ctx) => {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.globalCompositeOperation = 'lighter'; // Makes particles blend with light
+
+    particlesRef.current.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`; // White particles
+      ctx.fill();
+
+      p.x += p.dx;
+      p.y += p.dy;
+
+      // Wrap particles around edges
+      if (p.x < 0 || p.x > ctx.canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > ctx.canvas.height) p.dy *= -1;
+    });
+
+    requestAnimationFrame(() => drawParticles(ctx));
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = document.body.scrollHeight; // Cover entire scrollable height
+
+    const numParticles = Math.floor((canvas.width * canvas.height) / 30000); // Responsive particle count
+    particlesRef.current = Array.from({ length: numParticles }, () => createParticle(ctx));
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = document.body.scrollHeight;
+      const newNumParticles = Math.floor((canvas.width * canvas.height) / 30000);
+      particlesRef.current = Array.from({ length: newNumParticles }, () => createParticle(ctx));
+    };
+
+    window.addEventListener('resize', handleResize);
+    drawParticles(ctx);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [createParticle, drawParticles]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 pointer-events-none z-0"
+      style={{ opacity: 0.1 }} // Subtle opacity
+    ></canvas>
+  );
+};
 
 export default function Portfolio() {
   const [projects, setProjects] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const profileRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: profileRef, offset: ["start end", "end start"] });
+
+  // Parallax for background of profile section
+  const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]); // Moves background up by 50% of its height
 
   useEffect(() => {
     async function fetchRepos() {
@@ -181,26 +298,87 @@ export default function Portfolio() {
           }
         })
       );
-
       setProjects(data.filter(Boolean));
     }
-
     fetchRepos();
   }, []);
 
-  const handleNavLinkClick = () => {
-    setIsMobileMenuOpen(false);
-  };
+  const handleNavLinkClick = () => setIsMobileMenuOpen(false);
+
+  // --- Dark Mode Theme Colors ---
+  const primaryBgColor = '#0F172A'; // Even darker slate blue for depth
+  const secondaryBgColor = '#1E293B'; // Dark blue-gray for cards
+  const accentColor = '#67E8F9';      // Vibrant Cyan for highlights (modern & techy)
+  const primaryTextColor = '#F1F5F9'; // Near-white for general text
+  const secondaryTextColor = '#94A3B8'; // Muted blue-gray for descriptions
+  const buttonBgColor = '#3B82F6';    // Bright Blue for primary buttons
+  const buttonHoverBgColor = '#2563EB'; // Darker blue on hover
+  const borderColor = '#334155';      // Darker gray for subtle borders
+  const highlightColor = '#FDE047';   // Bright Yellow for stars/special accents (more pop)
+
+  const SectionHeading = ({ children }) => (
+    <h2 className="text-3xl sm:text-4xl font-extrabold mb-14 pb-3 relative inline-block group"
+        style={{ color: primaryTextColor }}>
+      {children}
+      <span className="absolute bottom-0 left-1/2 w-0 h-1 bg-gradient-to-r from-cyan-400 to-sky-500 transform -translate-x-1/2 group-hover:w-full transition-all duration-500"></span>
+    </h2>
+  );
+
+  const ProjectCard = ({ title, image, description, liveUrl, TypeIcon }) => (
+    <motion.div
+      className="rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between transform hover:-translate-y-2 relative group cursor-pointer"
+      style={{ backgroundColor: secondaryBgColor, border: `1px solid ${borderColor}` }}
+      variants={item}
+      whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.15)" }}
+      // For more advanced hover effects (e.g., light shimmer) you'd need a separate component or more complex CSS/JS
+    >
+      <img
+        src={image}
+        alt={title}
+        className="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-300"
+      />
+      <div className="p-6 flex flex-col flex-grow">
+        <h3 className="text-xl font-bold mb-2" style={{ color: primaryTextColor }}>{title}</h3>
+        <p className="text-sm md:text-base leading-relaxed mb-4 flex-grow" style={{ color: secondaryTextColor }}>
+          {description}
+        </p>
+        {liveUrl ? (
+          <a
+            href={liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block text-center font-semibold py-2.5 px-6 rounded-lg transition-all duration-300 text-base shadow-md hover:shadow-lg mt-auto relative overflow-hidden"
+            style={{ backgroundColor: buttonBgColor, color: primaryTextColor }}
+          >
+            <span className="relative z-10">{TypeIcon ? <TypeIcon className="inline-block mr-2" /> : null} View</span>
+            {/* Shimmer effect on hover */}
+            <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-shimmer rounded-lg"></span>
+          </a>
+        ) : (
+          <button
+            disabled
+            className="inline-block text-center font-semibold py-2.5 px-6 rounded-lg cursor-not-allowed text-base mt-auto opacity-70"
+            style={{ backgroundColor: borderColor, color: secondaryTextColor }}
+          >
+            No Live Demo
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
 
   return (
-    // Primary background for the entire portfolio using F3F3E0
-    <div className="min-h-screen font-sans antialiased" style={{ backgroundColor: '#F3F3E0', color: '#183B4E' }}>
+    <div className="min-h-screen font-sans antialiased relative overflow-hidden" style={{ backgroundColor: primaryBgColor, color: primaryTextColor }}>
+      {/* Particle Background */}
+      <ParticleCanvas />
+
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md shadow-lg z-50">
+      <nav className="fixed top-0 left-0 right-0 bg-gray-950/80 backdrop-blur-md shadow-lg z-50 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          {/* Logo/Name - Left side */}
-          <a href="#profile" className="text-2xl font-bold transition-colors duration-300" style={{ color: '#27548A', '&:hover': { color: '#183B4E' } }}>
-            Marl Joshua
+          {/* Logo/Name */}
+          <a href="#profile" className="text-2xl font-bold transition-colors duration-300 relative group" style={{ color: primaryTextColor }}>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-sky-500">Marl Joshua</span>
+            <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-cyan-400 to-sky-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
           </a>
 
           {/* Desktop Navigation Links */}
@@ -209,11 +387,10 @@ export default function Portfolio() {
               <a
                 key={section}
                 href={`#${section.replace(/\s+/g, '-')}`}
-                className="relative uppercase font-medium tracking-wide transition-colors duration-300 px-3 py-2 group text-base"
-                style={{ color: '#183B4E', '&:hover': { color: '#27548A' } }}
+                className="relative uppercase font-medium tracking-wide transition-colors duration-300 px-3 py-2 group text-base text-gray-300 hover:text-white"
               >
                 <span className="relative z-10">{section.charAt(0).toUpperCase() + section.slice(1)}</span>
-                <span className="absolute left-0 bottom-0 h-0.5 w-0 group-hover:w-full transition-all duration-300 ease-in-out" style={{ backgroundColor: '#27548A' }}></span>
+                <span className="absolute left-0 bottom-0 h-0.5 w-0 group-hover:w-full transition-all duration-300 ease-in-out bg-gradient-to-r from-cyan-400 to-sky-500"></span>
               </a>
             ))}
           </div>
@@ -222,8 +399,7 @@ export default function Portfolio() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="focus:outline-none focus:ring-2 rounded-md p-2 transition-colors duration-200"
-              style={{ color: '#183B4E', '&:hover': { color: '#27548A' }, focusRingColor: '#27548A' }}
+              className="focus:outline-none focus:ring-2 rounded-md p-2 transition-colors duration-200 text-gray-300 hover:text-white focus:ring-blue-500"
               aria-label="Toggle navigation menu"
             >
               {isMobileMenuOpen ? (
@@ -243,8 +419,8 @@ export default function Portfolio() {
               animate="visible"
               exit="exit"
               variants={mobileMenuVariants}
-              className="md:hidden fixed inset-0 backdrop-blur-md z-40 flex flex-col items-center justify-center space-y-8 py-20"
-              style={{ backgroundColor: 'rgba(39, 84, 138, 0.95)' }} // 27548A with 95% opacity
+              className="md:hidden fixed inset-0 backdrop-blur-md z-[100] flex flex-col items-center justify-center space-y-8 py-20"
+              style={{ backgroundColor: primaryBgColor + 'E0' }} // Add transparency
             >
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -258,8 +434,7 @@ export default function Portfolio() {
                   key={section}
                   href={`#${section.replace(/\s+/g, '-')}`}
                   onClick={handleNavLinkClick}
-                  className="text-3xl font-semibold hover:text-gray-200 transition-colors duration-300 py-2"
-                  style={{ color: '#F3F3E0' }} // Text color for mobile menu items
+                  className="text-3xl font-semibold hover:text-gray-200 transition-colors duration-300 py-2 text-white drop-shadow-md"
                 >
                   {section.charAt(0).toUpperCase() + section.slice(1)}
                 </a>
@@ -272,170 +447,159 @@ export default function Portfolio() {
       {/* Spacer for fixed nav */}
       <div className="h-20" />
 
+      {/* --- ALL PORTFOLIO SECTIONS START HERE --- */}
+
       {/* Profile Section */}
       <motion.section
         id="profile"
-        className="max-w-6xl mx-auto px-4 py-16 md:py-24 text-center relative"
+        ref={profileRef}
+        className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 text-center overflow-hidden z-10 rounded-xl my-8 shadow-2xl"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
         variants={fadeIn}
+        style={{ backgroundColor: secondaryBgColor }}
       >
-        <div className="flex flex-col items-center gap-6">
-          <img
+        {/* Animated Gradient Background */}
+        <motion.div
+          className="absolute inset-0 z-0 opacity-40 rounded-xl"
+          style={{
+            background: 'linear-gradient(45deg, rgba(103,232,249,0.3) 0%, rgba(59,130,246,0.3) 50%, rgba(139,92,246,0.3) 100%)',
+            backgroundSize: '400% 400%',
+            animation: 'gradient-animation 15s ease infinite',
+            y: yBg // Parallax effect
+          }}
+        ></motion.div>
+        {/* Subtle pattern over gradient */}
+        <div className="absolute inset-0 pattern-dots-md opacity-10 z-0" style={{ color: secondaryTextColor }}></div>
+
+        <div className="relative flex flex-col items-center gap-6 z-10">
+          <motion.img
             src="https://m.media-amazon.com/images/M/MV5BOTZhNDgwYmItMTdlZi00NDJlLWJlZWEtYmFlODE5MTBkYmIwXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg"
             alt="Profile of Marl"
-            className="w-48 h-64 sm:w-64 sm:h-80 object-cover mb-8 rounded-xl shadow-2xl border-4 border-white transform hover:scale-105 transition-transform duration-500 ease-in-out"
+            className="w-48 h-64 sm:w-64 sm:h-80 object-cover mb-8 rounded-xl shadow-2xl border-4 border-cyan-500 transform hover:scale-105 transition-transform duration-500 ease-in-out"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
           />
-          <p className="text-4xl sm:text-6xl font-extrabold leading-tight mb-4" style={{ color: '#183B4E' }}>
-            Hi, I'm <span style={{ color: '#27548A' }}>Marl Joshua</span>
-          </p>
-          <p className="text-lg sm:text-xl max-w-2xl mx-auto mb-8" style={{ color: '#4A4A4A' }}>
-            A passionate Computer Science Graduate, UI/UX Designer and Web Developer dedicated to building modern, responsive, and user-centric applications. My expertise spans across **React**, **JavaScript**, and various other cutting-edge web technologies.
-          </p>
-          <div className="flex flex-wrap justify-center gap-5 mt-4">
+          <motion.p
+            className="text-4xl sm:text-6xl font-extrabold leading-tight mb-4"
+            style={{ color: primaryTextColor }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+          >
+            Hi, I'm <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">Marl Joshua</span>
+          </motion.p>
+          <motion.p
+            className="text-lg sm:text-xl max-w-2xl mx-auto mb-8"
+            style={{ color: secondaryTextColor }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.6 }}
+          >
+            A passionate **Computer Science Graduate**, **UI/UX Designer**, and **Web Developer** dedicated to building modern, responsive, and user-centric applications. My expertise spans across **React**, **JavaScript**, and various other cutting-edge web technologies.
+          </motion.p>
+          <motion.div
+            className="flex flex-wrap justify-center gap-5 mt-4"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.8 }}
+          >
             <a
               href="https://www.facebook.com/bakus.abnuy/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
-              className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-125"
-              style={{ color: '#27548A' }} // Using accent blue for social icons
+              className="p-3 rounded-full bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-125 hover:bg-blue-800 social-icon-hover"
             >
-              <FaFacebook className="w-7 h-7" />
+              <FaFacebook className="w-6 h-6" />
             </a>
             <a
               href="https://www.instagram.com/who0is_marl/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-125"
-              style={{ color: '#DDA853' }} // Using accent gold for Instagram for contrast
+              className="p-3 rounded-full bg-pink-700 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-125 hover:bg-pink-800 social-icon-hover"
             >
-              <FaInstagram className="w-7 h-7" />
+              <FaInstagram className="w-6 h-6" />
             </a>
             <a
               href="https://www.linkedin.com/in/marl-joshua-banaguas-86a34826b/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="LinkedIn"
-              className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-125"
-              style={{ color: '#27548A' }}
+              className="p-3 rounded-full bg-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-125 hover:bg-blue-900 social-icon-hover"
             >
-              <FaLinkedin className="w-7 h-7" />
+              <FaLinkedin className="w-6 h-6" />
             </a>
             <a
               href="https://github.com/Sushi1-lab"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub"
-              className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-125"
-              style={{ color: '#183B4E' }} // Using dark blue for GitHub
+              className="p-3 rounded-full bg-gray-700 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-125 hover:bg-gray-800 social-icon-hover"
             >
-              <FaGithub className="w-7 h-7" />
+              <FaGithub className="w-6 h-6" />
             </a>
-          </div>
+          </motion.div>
         </div>
       </motion.section>
 
       {/* Certifications Section */}
       <motion.section
         id="certifications"
-        className="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-20"
+        className="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-10"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.25 }}
         variants={slideUp}
       >
-        <h2 className="text-3xl sm:text-4xl font-extrabold mb-14 border-b-4 pb-2 inline-block" style={{ color: '#183B4E', borderColor: '#27548A' }}>Certifications</h2>
+        <SectionHeading>Certifications</SectionHeading>
 
         <motion.ul
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-12"
           variants={container}
         >
-          {/* Certification Card 1 */}
-          <motion.li
-            className="flex flex-col bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden p-6"
-            variants={item}
-          >
-            <div className="flex-shrink-0 mb-6 rounded-lg p-2 border" style={{ backgroundColor: '#F3F3E0', borderColor: '#DDA853' }}>
-              <img
-                src="https://i.imgur.com/XEo2GOl.jpeg"
-                alt="Most Innovative Project & Study | Research Symposium Certificate"
-                className="w-full h-auto object-cover rounded-lg"
-                loading="lazy"
-              />
-            </div>
-            <div className="flex flex-col flex-grow items-center text-center">
-                <p className="font-bold text-lg sm:text-xl mb-2" style={{ color: '#183B4E' }}>Most Innovative Project & Study | Research Symposium</p>
-                <p className="text-sm mb-4" style={{ color: '#4A4A4A' }}>Received: <span className="font-medium">2024</span></p>
-                <a
-                    href="https://i.imgur.com/XEo2GOl.jpeg"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-auto inline-block text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300 text-sm shadow-md hover:shadow-lg"
-                    style={{ backgroundColor: '#27548A', '&:hover': { backgroundColor: '#183B4E' } }}
-                >
-                    View Certificate
-                </a>
-            </div>
-          </motion.li>
+          {certifications.map(cert => (
+            <motion.li
+              key={cert.id}
+              className="flex flex-col rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden p-6 transform hover:-translate-y-1 group relative"
+              style={{ backgroundColor: secondaryBgColor, border: `1px solid ${borderColor}` }}
+              variants={item}
+              whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.15)" }}
+            >
+              {/* Subtle radial gradient background on hover */}
+              <div className="absolute inset-0 bg-radial-gradient opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
 
-          {/* Certification Card 2 */}
-          <motion.li
-            className="flex flex-col bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden p-6"
-            variants={item}
-          >
-            <div className="flex-shrink-0 mb-6 rounded-lg p-2 border" style={{ backgroundColor: '#F3F3E0', borderColor: '#DDA853' }}>
-              <img
-                src="https://i.imgur.com/sNSpNOI.jpeg"
-                alt="Penetration Testing With Ethical Hacking Training - NexusCloud IT Solutions Certificate"
-                className="w-full h-auto object-cover rounded-lg"
-                loading="lazy"
-              />
-            </div>
-            <div className="flex flex-col flex-grow items-center text-center">
-                <p className="font-bold text-lg sm:text-xl mb-2" style={{ color: '#183B4E' }}>Penetration Testing With Ethical Hacking Training</p>
-                <p className="text-sm mb-4" style={{ color: '#4A4A4A' }}>Completed: <span className="font-medium">2025</span> | <span style={{ color: '#27548A' }}>NexusCloud IT Solutions</span></p>
+              <div className="flex-shrink-0 mb-6 rounded-lg p-2 border-2 relative z-10" style={{ borderColor: highlightColor, backgroundColor: primaryBgColor }}>
+                <img
+                  src={cert.image}
+                  alt={cert.title}
+                  className="w-full h-auto object-cover rounded-md shadow-inner"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex flex-col flex-grow items-center text-center relative z-10">
+                <p className="font-bold text-lg sm:text-xl mb-2" style={{ color: primaryTextColor }}>{cert.title}</p>
+                <p className="text-sm mb-4" style={{ color: secondaryTextColor }}>
+                  {cert.received && `Received: `}<span className="font-semibold" style={{ color: primaryTextColor }}>{cert.received}</span>
+                  {cert.completed && `Completed: `}<span className="font-semibold" style={{ color: primaryTextColor }}>{cert.completed}</span>
+                  {cert.issuer && ` | `}<span style={{ color: accentColor }}>{cert.issuer}</span>
+                </p>
                 <a
-                    href="https://i.imgur.com/sNSpNOI.jpeg"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-auto inline-block text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300 text-sm shadow-md hover:shadow-lg"
-                    style={{ backgroundColor: '#27548A', '&:hover': { backgroundColor: '#183B4E' } }}
+                  href={cert.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto inline-block font-semibold py-2 px-6 rounded-lg transition-all duration-300 text-sm shadow-md hover:shadow-lg relative overflow-hidden"
+                  style={{ backgroundColor: buttonBgColor, color: primaryTextColor }}
                 >
-                    View Certificate
+                  <span className="relative z-10">View Certificate</span>
+                  <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-shimmer rounded-lg"></span>
                 </a>
-            </div>
-          </motion.li>
-
-          {/* Certification Card 3 */}
-          <motion.li
-            className="flex flex-col bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden p-6"
-            variants={item}
-          >
-            <div className="flex-shrink-0 mb-6 rounded-lg p-2 border" style={{ backgroundColor: '#F3F3E0', borderColor: '#DDA853' }}>
-              <img
-                src="https://i.imgur.com/3ReV0Wd.jpeg"
-                alt="Cisco Certified Network Associate Training | NexusCloud IT Solutions Certificate"
-                className="w-full h-auto object-cover rounded-lg"
-                loading="lazy"
-              />
-            </div>
-            <div className="flex flex-col flex-grow items-center text-center">
-                <p className="font-bold text-lg sm:text-xl mb-2" style={{ color: '#183B4E' }}>Cisco Certified Network Associate Training</p>
-                <p className="text-sm mb-4" style={{ color: '#4A4A4A' }}>Completed: <span className="font-medium">2025</span> | <span style={{ color: '#27548A' }}>NexusCloud IT Solutions</span></p>
-                <a
-                    href="https://i.imgur.com/3ReV0Wd.jpeg"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-auto inline-block text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300 text-sm shadow-md hover:shadow-lg"
-                    style={{ backgroundColor: '#27548A', '&:hover': { backgroundColor: '#183B4E' } }}
-                >
-                    View Certificate
-                </a>
-            </div>
-          </motion.li>
+              </div>
+            </motion.li>
+          ))}
         </motion.ul>
       </motion.section>
 
@@ -448,10 +612,10 @@ export default function Portfolio() {
         viewport={{ once: true, amount: 0.25 }}
         variants={slideUp}
       >
-        <h2 className="text-3xl sm:text-4xl font-extrabold mb-14 border-b-4 pb-2 inline-block" style={{ color: '#183B4E', borderColor: '#27548A' }}>Code Projects</h2>
+        <SectionHeading>Code Projects</SectionHeading>
 
         {projects.length === 0 ? (
-          <p className="text-lg" style={{ color: '#4A4A4A' }}>Loading projects from GitHub...</p>
+          <p className="text-lg" style={{ color: secondaryTextColor }}>Loading projects from GitHub...</p>
         ) : (
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10"
@@ -460,49 +624,53 @@ export default function Portfolio() {
             {projects.map((project) => (
               <motion.div
                 key={project.id}
-                className="bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 p-6 flex flex-col justify-between border"
-                style={{ borderColor: '#F3F3E0' }} // Border matches light background
+                className="rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 p-6 flex flex-col justify-between transform hover:-translate-y-1 group relative"
+                style={{ backgroundColor: secondaryBgColor, border: `1px solid ${borderColor}` }}
                 variants={item}
+                whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.15)" }}
               >
+                {/* Subtle radial gradient background on hover */}
+                <div className="absolute inset-0 bg-radial-gradient opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+
                 <a
                   href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center mb-4 gap-4 group"
+                  className="flex items-center mb-4 gap-4 group relative z-10"
                 >
                   <img
                     src={project.avatar}
                     alt={project.owner}
-                    className="w-12 h-12 rounded-full border-2 transition-colors duration-300"
-                    style={{ borderColor: '#DDA853', '&:hover': { borderColor: '#27548A' } }}
+                    className="w-12 h-12 rounded-full border-2 transform group-hover:scale-110 transition-transform duration-300" style={{ borderColor: highlightColor }}
                   />
-                  <h3 className="text-xl font-bold group-hover:text-blue-700 transition-colors duration-300" style={{ color: '#183B4E', '&:hover': { color: '#27548A' } }}>{project.name}</h3>
+                  <h3 className="text-xl font-bold" style={{ color: primaryTextColor }}>{project.name}</h3>
                 </a>
-                <p className="mb-4 min-h-[4rem] text-sm md:text-base leading-relaxed" style={{ color: '#4A4A4A' }}>
+                <p className="mb-4 min-h-[4rem] text-sm md:text-base leading-relaxed relative z-10" style={{ color: secondaryTextColor }}>
                   {project.description || "No description provided."}
                 </p>
-                <div className="flex justify-between items-center text-sm mb-6" style={{ color: '#4A4A4A' }}>
-                  <span className="flex items-center gap-1">
-                    <svg className="w-4 h-4" style={{ color: '#DDA853' }} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                <div className="flex justify-between items-center text-sm mb-6 relative z-10" style={{ color: secondaryTextColor }}>
+                  <span className="flex items-center gap-1" style={{ color: highlightColor }}>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
                     {project.stars}
                   </span>
-                  <span className="font-medium" style={{ color: '#27548A' }}>{project.language || "N/A"}</span>
+                  <span className="font-medium px-3 py-1 rounded-full text-xs" style={{ backgroundColor: primaryBgColor, color: accentColor }}>{project.language || "N/A"}</span>
                 </div>
                 {project.liveUrl ? (
                   <a
                     href={project.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block text-center text-white font-semibold py-2.5 px-6 rounded-lg transition-colors duration-300 text-base shadow-md hover:shadow-lg mt-auto"
-                    style={{ backgroundColor: '#27548A', '&:hover': { backgroundColor: '#183B4E' } }}
+                    className="inline-block text-center font-semibold py-2.5 px-6 rounded-lg transition-all duration-300 text-base shadow-md hover:shadow-lg mt-auto relative overflow-hidden"
+                    style={{ backgroundColor: buttonBgColor, color: primaryTextColor }}
                   >
-                    Try Live Demo
+                    <span className="relative z-10">Try Live Demo</span>
+                    <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-shimmer rounded-lg"></span>
                   </a>
                 ) : (
                   <button
                     disabled
-                    className="inline-block text-center text-gray-600 font-semibold py-2.5 px-6 rounded-lg cursor-not-allowed text-base mt-auto"
-                    style={{ backgroundColor: '#D4D4D4', color: '#888' }} // Adjust disabled button color
+                    className="inline-block text-center font-semibold py-2.5 px-6 rounded-lg cursor-not-allowed text-base mt-auto opacity-70"
+                    style={{ backgroundColor: borderColor, color: secondaryTextColor }}
                   >
                     No Live Demo
                   </button>
@@ -516,55 +684,16 @@ export default function Portfolio() {
       {/* Poster Designs Section */}
       <motion.section
         id="poster-designs"
-        className="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-5"
+        className="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-10"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.25 }}
         variants={slideUp}
       >
-        <h2 className="text-3xl sm:text-4xl font-extrabold mb-14 border-b-4 pb-2 inline-block" style={{ color: '#183B4E', borderColor: '#27548A' }}>Poster Designs</h2>
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 xl:gap-10"
-          variants={container}
-        >
-          {posterDesignProjects.map(({ id, title, image, description, liveUrl }) => (
-            <motion.div
-              key={id}
-              className="bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between border"
-              style={{ borderColor: '#F3F3E0' }}
-              variants={item}
-            >
-              <img
-                src={image}
-                alt={title}
-                className="w-full h-56 object-cover transform hover:scale-105 transition-transform duration-300"
-              />
-              <div className="p-6 flex flex-col flex-grow">
-                <h3 className="text-xl font-bold mb-2" style={{ color: '#183B4E' }}>{title}</h3>
-                <p className="text-sm md:text-base leading-relaxed mb-4 flex-grow" style={{ color: '#4A4A4A' }}>
-                  {description}
-                </p>
-                {liveUrl ? (
-                  <a
-                    href={liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block text-center text-white font-semibold py-2.5 px-6 rounded-lg transition-colors duration-300 text-base shadow-md hover:shadow-lg mt-auto"
-                    style={{ backgroundColor: '#27548A', '&:hover': { backgroundColor: '#183B4E' } }}
-                  >
-                    View Design
-                  </a>
-                ) : (
-                  <button
-                    disabled
-                    className="inline-block text-center text-gray-600 font-semibold py-2.5 px-6 rounded-lg cursor-not-allowed text-base mt-auto"
-                    style={{ backgroundColor: '#D4D4D4', color: '#888' }}
-                  >
-                    No Live Demo
-                  </button>
-                )}
-              </div>
-            </motion.div>
+        <SectionHeading>Poster Designs</SectionHeading>
+        <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 xl:gap-10" variants={container}>
+          {posterDesignProjects.map((project) => (
+            <ProjectCard key={project.id} {...project} />
           ))}
         </motion.div>
       </motion.section>
@@ -572,55 +701,16 @@ export default function Portfolio() {
       {/* Web Designs Section */}
       <motion.section
         id="web-designs"
-        className="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-5"
+        className="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-10"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.25 }}
         variants={slideUp}
       >
-        <h2 className="text-3xl sm:text-4xl font-extrabold mb-14 border-b-4 pb-2 inline-block" style={{ color: '#183B4E', borderColor: '#27548A' }}>Web Designs</h2>
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10"
-          variants={container}
-        >
-          {designProjects.map(({ id, title, image, description, liveUrl }) => (
-            <motion.div
-              key={id}
-              className="bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between border"
-              style={{ borderColor: '#F3F3E0' }}
-              variants={item}
-            >
-              <img
-                src={image}
-                alt={title}
-                className="w-full h-56 object-cover transform hover:scale-105 transition-transform duration-300"
-              />
-              <div className="p-6 flex flex-col flex-grow">
-                <h3 className="text-xl font-bold mb-2" style={{ color: '#183B4E' }}>{title}</h3>
-                <p className="text-sm md:text-base leading-relaxed mb-4 flex-grow" style={{ color: '#4A4A4A' }}>
-                  {description}
-                </p>
-                {liveUrl ? (
-                  <a
-                    href={liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block text-center text-white font-semibold py-2.5 px-6 rounded-lg transition-colors duration-300 text-base shadow-md hover:shadow-lg mt-auto"
-                    style={{ backgroundColor: '#27548A', '&:hover': { backgroundColor: '#183B4E' } }}
-                  >
-                    View Design
-                  </a>
-                ) : (
-                  <button
-                    disabled
-                    className="inline-block text-center text-gray-600 font-semibold py-2.5 px-6 rounded-lg cursor-not-allowed text-base mt-auto"
-                    style={{ backgroundColor: '#D4D4D4', color: '#888' }}
-                  >
-                    No Live Demo
-                  </button>
-                )}
-              </div>
-            </motion.div>
+        <SectionHeading>Web Designs</SectionHeading>
+        <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10" variants={container}>
+          {designProjects.map((project) => (
+            <ProjectCard key={project.id} {...project} />
           ))}
         </motion.div>
       </motion.section>
@@ -628,122 +718,69 @@ export default function Portfolio() {
       {/* Tools Section */}
       <motion.section
         id="tools"
-        className="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-0"
+        className="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-10"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.25 }}
         variants={slideUp}
       >
-        <h2 className="text-3xl sm:text-4xl font-extrabold mb-14 border-b-4 pb-2 inline-block" style={{ color: '#183B4E', borderColor: '#27548A' }}>Tools I Use</h2>
+        <SectionHeading>Tools I Use</SectionHeading>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 max-w-6xl mx-auto">
 
           {/* WebDev Tools */}
-          <motion.div className="bg-white rounded-xl shadow-xl p-8" variants={item}>
-            <h3 className="text-2xl sm:text-3xl font-bold mb-8 border-b-2 pb-3" style={{ color: '#183B4E', borderColor: '#DDA853' }}>Web Development</h3>
-            <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/fWRnBaX.png" alt="Javascript" className="w-16 h-8 sm:w-20 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>JavaScript</span>
-              </div>
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/p50Qdqz.png" alt="HTML" className="w-16 h-8 sm:w-20 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>HTML5</span>
-              </div>
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/R0MUf0G.png" alt="CSS" className="w-8 h-8 sm:w-10 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>CSS3</span>
-              </div>
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/p84qlZF.png" alt="React" className="w-8 h-8 sm:w-10 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>React.js</span>
-              </div>
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/U52GWbJ.png" alt="Vite" className="w-8 h-8 sm:w-10 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>Vite</span>
-              </div>
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/hzIN8ss.png" alt="Tailwind CSS" className="w-8 h-8 sm:w-10 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>Tailwind CSS</span>
-              </div>
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/z1fScsK.png" alt="GitHub" className="w-16 h-8 sm:w-20 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>GitHub</span>
-              </div>
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/PFhP5CL.png" alt="Firebase" className="w-16 h-8 sm:w-20 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>Firebase</span>
-              </div>
+          <motion.div
+            className="rounded-xl shadow-xl p-8 transform hover:-translate-y-1 transition-transform duration-300 relative group"
+            style={{ backgroundColor: secondaryBgColor, border: `1px solid ${borderColor}` }}
+            variants={item}
+            whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.15)" }}
+          >
+            {/* Subtle radial gradient background on hover */}
+            <div className="absolute inset-0 bg-radial-gradient opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+
+            <h3 className="text-2xl sm:text-3xl font-bold mb-8 border-b-2 pb-3 relative inline-block group" style={{ color: primaryTextColor, borderColor: borderColor }}>
+              Web Development
+              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-cyan-400 to-sky-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+            </h3>
+            <div className="flex flex-wrap justify-center gap-6 sm:gap-8 relative z-10">
+              {webDevTools.map(tool => (
+                <div key={tool.name} className="flex flex-col items-center p-3 sm:p-4 w-28 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105" style={{ backgroundColor: primaryBgColor }}>
+                  <img src={tool.image} alt={tool.name} className="w-16 h-8 sm:w-20 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
+                  <span className="text-sm font-medium" style={{ color: primaryTextColor }}>{tool.name}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
 
           {/* Design Tools */}
-          <motion.div className="bg-white rounded-xl shadow-xl p-8" variants={item}>
-            <h3 className="text-2xl sm:text-3xl font-bold mb-8 border-b-2 pb-3" style={{ color: '#183B4E', borderColor: '#DDA853' }}>Design & Creative</h3>
-            <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/qKMRYbC.png" alt="Canva" className="w-16 h-8 sm:w-20 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>Canva</span>
-              </div>
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/D6UyNPW.png" alt="Figma" className="w-20 h-8 sm:w-25 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>Figma</span>
-              </div>
-              <div className="flex flex-col items-center p-3 sm:p-4 w-28">
-                <img src="https://i.imgur.com/b5e3pj5.png" alt="Photoshop" className="w-20 h-8 sm:w-25 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
-                <span className="text-sm font-medium" style={{ color: '#4A4A4A' }}>Adobe Photoshop</span>
-              </div>
+          <motion.div
+            className="rounded-xl shadow-xl p-8 transform hover:-translate-y-1 transition-transform duration-300 relative group"
+            style={{ backgroundColor: secondaryBgColor, border: `1px solid ${borderColor}` }}
+            variants={item}
+            whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.15)" }}
+          >
+            {/* Subtle radial gradient background on hover */}
+            <div className="absolute inset-0 bg-radial-gradient opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+
+            <h3 className="text-2xl sm:text-3xl font-bold mb-8 border-b-2 pb-3 relative inline-block group" style={{ color: primaryTextColor, borderColor: borderColor }}>
+              Design & Creative
+              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-fuchsia-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+            </h3>
+            <div className="flex flex-wrap justify-center gap-6 sm:gap-8 relative z-10">
+              {designTools.map(tool => (
+                <div key={tool.name} className="flex flex-col items-center p-3 sm:p-4 w-28 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105" style={{ backgroundColor: primaryBgColor }}>
+                  <img src={tool.image} alt={tool.name} className="w-16 h-8 sm:w-20 sm:h-10 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
+                  <span className="text-sm font-medium" style={{ color: primaryTextColor }}>{tool.name}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
       </motion.section>
 
       {/* Footer */}
-      <footer className="py-10 mt-20" style={{ backgroundColor: '#183B4E', color: '#F3F3E0' }}>
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-sm">&copy; {new Date().getFullYear()} Marl Joshua. All rights reserved.</p>
-          <div className="flex justify-center space-x-6 mt-4">
-            <a
-              href="https://www.facebook.com/bakus.abnuy/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="hover:text-blue-500 transition-colors duration-300"
-              style={{ color: '#F3F3E0', '&:hover': { color: '#27548A' } }}
-            >
-              <FaFacebook className="w-6 h-6" />
-            </a>
-            <a
-              href="https://www.instagram.com/who0is_marl/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="hover:text-pink-500 transition-colors duration-300"
-              style={{ color: '#F3F3E0', '&:hover': { color: '#DDA853' } }}
-            >
-              <FaInstagram className="w-6 h-6" />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/marl-joshua-banaguas-86a34826b/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              className="hover:text-blue-600 transition-colors duration-300"
-              style={{ color: '#F3F3E0', '&:hover': { color: '#27548A' } }}
-            >
-              <FaLinkedin className="w-6 h-6" />
-            </a>
-            <a
-              href="https://github.com/Sushi1-lab"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub"
-              className="hover:text-gray-200 transition-colors duration-300"
-              style={{ color: '#F3F3E0', '&:hover': { color: '#DDA853' } }}
-            >
-              <FaGithub className="w-6 h-6" />
-            </a>
-          </div>
-        </div>
+      <footer className="w-full py-8 text-center text-gray-400 text-sm border-t border-gray-700 mt-16" style={{ backgroundColor: primaryBgColor }}>
+        <p>&copy; {new Date().getFullYear()} Marl Joshua. All rights reserved.</p>
+        <p className="mt-2">Built with React, Tailwind CSS, and Framer Motion.</p>
       </footer>
     </div>
   );

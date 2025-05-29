@@ -4,3 +4,36 @@ html{
   scroll-behavior: smooth;
   background: linear-gradient(to bottom, #213448, #f1f5f9, #547792);
 }
+
+ @keyframes gradient-animation {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        .animate-shimmer {
+          animation: shimmer 1.5s infinite;
+        }
+
+        /* Custom radial gradient for hover effects on cards */
+        .bg-radial-gradient {
+          background: radial-gradient(circle at center, rgba(103,232,249,0.1) 0%, transparent 70%);
+        }
+
+        /* Enhance social icon hover with a glow effect */
+        .social-icon-hover:hover {
+          filter: drop-shadow(0 0 8px var(--tw-shadow-color)); /* Using default shadow color */
+        }
+        .social-icon-hover:hover.bg-blue-700 { --tw-shadow-color: rgba(29, 78, 216, 0.7); }
+        .social-icon-hover:hover.bg-pink-700 { --tw-shadow-color: rgba(190, 24, 93, 0.7); }
+        .social-icon-hover:hover.bg-blue-800 { --tw-shadow-color: rgba(30, 58, 138, 0.7); }
+        .social-icon-hover:hover.bg-gray-700 { --tw-shadow-color: rgba(75, 85, 99, 0.7); }

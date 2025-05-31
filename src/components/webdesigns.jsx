@@ -17,7 +17,7 @@ const WebDesigns = () => {
     >
       <SectionHeading>Web Designs</SectionHeading>
       <motion.div
-        className="flex justify-center flex-row items-center p-4"
+        className="flex justify-center flex-col items-center p-4"
         variants={container}
       >
         <motion.div

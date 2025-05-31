@@ -37,3 +37,76 @@ html{
         .social-icon-hover:hover.bg-pink-700 { --tw-shadow-color: rgba(190, 24, 93, 0.7); }
         .social-icon-hover:hover.bg-blue-800 { --tw-shadow-color: rgba(30, 58, 138, 0.7); }
         .social-icon-hover:hover.bg-gray-700 { --tw-shadow-color: rgba(75, 85, 99, 0.7); }
+
+        /* Custom Utilities for background patterns */
+.pattern-dots-md {
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Base styles for the radial gradient for cards on hover */
+.bg-radial-gradient {
+  background: radial-gradient(circle at center, rgba(103,232,249,0.1) 0%, transparent 70%);
+}
+
+/* Keyframes for the gradient animation in Profile section */
+@keyframes gradient-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Keyframes for the shimmer effect on buttons */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Apply shimmer animation */
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+
+/* Base styles for social icon hover effect */
+.social-icon-hover {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex; /* Ensure it respects padding/margins */
+  align-items: center;
+  justify-content: center;
+}
+
+.social-icon-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  transform: scale(0);
+  opacity: 0;
+  border-radius: inherit; /* Inherit border-radius from parent */
+  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+}
+
+.social-icon-hover:hover::before {
+  transform: scale(1.5);
+  opacity: 1;
+}
+
+/* General body styling */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}

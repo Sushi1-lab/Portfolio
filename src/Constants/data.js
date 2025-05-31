@@ -11,8 +11,9 @@ export const liveProjectUrls = {
   "Sushi1-lab/Finance-Tracker": "https://finance-tracker-seven-beta.vercel.app/",
   "Sushi1-lab/Elan": "https://elan-swart.vercel.app/",
 };
-
+ //Web Design Projects
 export const singleWebDesignImage = "https://i.imgur.com/Iu6wUtE.png";
+export const singleWebDesignImage1 = "https://i.imgur.com/JNKYNRO.png";
 
 export const designProjects = [ // These are for the "Poster Designs" using ProjectCard
   {

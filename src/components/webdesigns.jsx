@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import SectionHeading from '../components/sectionheadings';
-import { singleWebDesignImage } from '../Constants/data';
+import { singleWebDesignImage, singleWebDesignImage1 } from '../Constants/data';
 import { slideUp, container, fallIn } from '../Constants/animation';
 
 const WebDesigns = () => {
@@ -17,20 +17,33 @@ const WebDesigns = () => {
     >
       <SectionHeading>Web Designs</SectionHeading>
       <motion.div
-        className="flex justify-center items-center p-4"
+        className="flex justify-center flex-row items-center p-4"
         variants={container}
       >
         <motion.div
-          className="w-full max-w-4xl h-[400px] md:h-[500px] lg:h-[600px] xl:h-[700px] overflow-hidden rounded-lg shadow-xl flex items-center justify-center bg-gray-100"
+          className="w-full max-w-4xl h-[400px] md:h-[500px] lg:h-[400px] xl:h-[500px] overflow-hidden flex items-center justify-center"
           variants={fallIn}
         >
           <img
             src={singleWebDesignImage}
             alt="My Web Design"
-            className="w-full h-full object-contain" // Use object-contain to fit the image without cropping
+            className="w-full h-full object-contain shadow-2xl" // Use object-contain to fit the image without cropping
             loading="lazy"
           />
         </motion.div>
+
+        <motion.div
+          className="w-full max-w-4xl h-[400px] md:h-[500px] lg:h-[400px] xl:h-[500px] overflow-hidden flex items-center justify-center"
+          variants={fallIn}
+        >
+          <img
+            src={singleWebDesignImage1}
+            alt="My Web Design"
+            className="w-full h-full object-contain shadow-2xl" // Use object-contain to fit the image without cropping
+            loading="lazy"
+          />
+        </motion.div>
+        
       </motion.div>
     </motion.section>
   );

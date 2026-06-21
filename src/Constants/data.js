@@ -31,6 +31,7 @@ export const designProjects = [ // These are for the "Poster Designs" using Proj
     image: "https://i.imgur.com/rcaWiv6.png",
     description: "Cars Color consultation Website Design with a clean and modern look.",
     liveUrl:"https://imgur.com/a/baNY2GL",
+    video: "https://drive.google.com/file/d/1XoX-VkAQvgfCYDhJlj1QLZGChhH0ngYo/view?usp=sharing",
   }
 ];
 

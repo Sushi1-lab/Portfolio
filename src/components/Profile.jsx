@@ -77,7 +77,7 @@ const Profile = () => {
             <FaFacebook className="w-6 h-6" />
           </a>
           <a
-            href="https://www.instagram.com/who0is_marl/"
+            href="https://www.instagram.com/oc34n_1"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram"

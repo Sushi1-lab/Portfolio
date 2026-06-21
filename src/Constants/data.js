@@ -4,12 +4,14 @@ export const githubRepos = [
   "https://github.com/Sushi1-lab/Invitation",
   "https://github.com/Sushi1-lab/Finance-Tracker",
   "https://github.com/Sushi1-lab/Elan",
+  "https://github.com/Sushi1-lab/Menu"
 ];
 
 export const liveProjectUrls = {
   "Sushi1-lab/Invitation": "https://invitation-ten-xi.vercel.app/",
   "Sushi1-lab/Finance-Tracker": "https://finance-tracker-seven-beta.vercel.app/",
   "Sushi1-lab/Elan": "https://elan-swart.vercel.app/",
+  "Sushi1-lab/Menu": "https://menu-woad-xi.vercel.app/",
 };
  //Web Design Projects
 export const singleWebDesignImage = "https://i.imgur.com/Iu6wUtE.png";

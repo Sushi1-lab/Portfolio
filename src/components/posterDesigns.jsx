@@ -20,30 +20,24 @@ const PosterDesigns = () => {
         {posterDesignProjects.map((project) => (
           <motion.div
             key={project.id}
-            className="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer"
-            whileHover={{ scale: 1.03 }}
+            className="relative group cursor-pointer z-0 hover:z-50"
           >
-            {/* Image */}
-            <img
-              src={project.image}
-              alt={project.title}
-              className="w-full h-[300px] object-cover transition duration-300 group-hover:scale-110"
-              loading="lazy"
-            />
-
-            {/* Hover Overlay */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition duration-300 flex items-center justify-center">
-              <p className="text-white text-lg font-semibold opacity-0 group-hover:opacity-100 transition">
-                {project.title}
-              </p>
-            </div>
-
-            {/* Full Image Preview on Hover */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300">
+            {/* Card container */}
+            <div className="overflow-hidden rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:shadow-2xl bg-white">
               <img
                 src={project.image}
                 alt={project.title}
-                className="w-full h-full object-contain bg-black"
+                className="w-full h-[300px] object-cover"
+                loading="lazy"
+              />
+            </div>
+
+            {/* Floating popup preview */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-125 transition duration-300 pointer-events-none z-50">
+              <img
+                src={project.image}
+                alt={project.title}
+                className="w-[350px] md:w-[450px] rounded-xl shadow-2xl border border-white"
               />
             </div>
           </motion.div>

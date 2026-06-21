@@ -1,5 +1,4 @@
-// src/components/WebDesigns.jsx
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import SectionHeading from "../components/sectionheadings";
 import {
@@ -9,8 +8,41 @@ import {
 import { slideUp, container, fallIn } from "../Constants/animation";
 
 const WebDesigns = () => {
-  const videoUrl =
-      "https://drive.google.com/file/d/1XoX-VkAQvgfCYDhJlj1QLZGChhH0ngYo/preview?autoplay=1&mute=1";
+  const baseVideoUrl =
+    "https://drive.google.com/file/d/1XoX-VkAQvgfCYDhJlj1QLZGChhH0ngYo/preview?autoplay=1&mute=1";
+
+  const normalVideoUrl =
+    "https://drive.google.com/file/d/1XoX-VkAQvgfCYDhJlj1QLZGChhH0ngYo/preview?mute=1";
+
+  const [videoSrc, setVideoSrc] = useState(normalVideoUrl);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // play when visible
+          setVideoSrc(baseVideoUrl);
+        } else {
+          // reset when out of view
+          setVideoSrc(normalVideoUrl);
+        }
+      },
+      {
+        threshold: 0.6,
+      }
+    );
+
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+
+    return () => {
+      if (videoRef.current) {
+        observer.unobserve(videoRef.current);
+      }
+    };
+  }, []);
 
   return (
     <motion.section
@@ -53,12 +85,16 @@ const WebDesigns = () => {
           />
         </motion.div>
 
-        {/* Video */}
-        <motion.div className="w-full max-w-4xl" variants={fallIn}>
+        {/* Video (commercial style stable autoplay) */}
+        <motion.div
+          ref={videoRef}
+          className="w-full max-w-4xl h-[400px] md:h-[500px]"
+          variants={fallIn}
+        >
           <iframe
-            src={videoUrl}
+            src={videoSrc}
             title="Website Demo Video"
-            className="w-full h-[400px] md:h-[500px] rounded-xl shadow-2xl"
+            className="w-full h-full rounded-xl shadow-2xl pointer-events-none"
             allow="autoplay; encrypted-media"
             allowFullScreen
           />

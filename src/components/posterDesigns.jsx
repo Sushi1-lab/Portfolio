@@ -1,17 +1,34 @@
-// src/components/PosterDesigns.jsx
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import SectionHeading from "../components/sectionheadings";
 import { posterDesignProjects } from "../Constants/data";
 import { container } from "../Constants/animation";
 
 const PosterDesigns = () => {
+  const [activePoster, setActivePoster] = useState(null);
+
+  const closePopup = () => setActivePoster(null);
+
   return (
     <motion.section
       id="poster-designs"
       className="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center relative z-10"
     >
       <SectionHeading>Poster Designs</SectionHeading>
+
+      {/* MOBILE BACKDROP (tap to close) */}
+      {activePoster && (
+        <div
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+          onClick={closePopup}
+        >
+          <img
+            src={activePoster.image}
+            alt={activePoster.title}
+            className="w-[90%] max-w-[500px] rounded-xl shadow-2xl"
+          />
+        </div>
+      )}
 
       <motion.div
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 xl:gap-10"
@@ -21,8 +38,9 @@ const PosterDesigns = () => {
           <motion.div
             key={project.id}
             className="relative group cursor-pointer z-0 hover:z-50"
+            onClick={() => setActivePoster(project)} // 📱 mobile tap
           >
-            {/* Card container */}
+            {/* Card */}
             <div className="overflow-hidden rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:shadow-2xl bg-white">
               <img
                 src={project.image}
@@ -32,8 +50,8 @@ const PosterDesigns = () => {
               />
             </div>
 
-            {/* Floating popup preview */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-125 transition duration-300 pointer-events-none z-50">
+            {/* DESKTOP HOVER POPUP */}
+            <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-125 transition duration-300 pointer-events-none z-50">
               <img
                 src={project.image}
                 alt={project.title}

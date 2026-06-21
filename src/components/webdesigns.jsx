@@ -21,10 +21,8 @@ const WebDesigns = () => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // play when visible
           setVideoSrc(baseVideoUrl);
         } else {
-          // reset when out of view
           setVideoSrc(normalVideoUrl);
         }
       },
@@ -61,7 +59,7 @@ const WebDesigns = () => {
       >
         {/* First Image */}
         <motion.div
-          className="w-full max-w-4xl h-[400px] md:h-[500px] overflow-hidden flex items-center justify-center"
+          className="w-full max-w-4xl aspect-video overflow-hidden flex items-center justify-center"
           variants={fallIn}
         >
           <img
@@ -74,7 +72,7 @@ const WebDesigns = () => {
 
         {/* Second Image */}
         <motion.div
-          className="w-full max-w-4xl h-[400px] md:h-[500px] overflow-hidden flex items-center justify-center"
+          className="w-full max-w-4xl aspect-video overflow-hidden flex items-center justify-center"
           variants={fallIn}
         >
           <img
@@ -85,16 +83,16 @@ const WebDesigns = () => {
           />
         </motion.div>
 
-        {/* Video (commercial style stable autoplay) */}
+        {/* Video (responsive + clean mobile UI) */}
         <motion.div
           ref={videoRef}
-          className="w-full max-w-4xl h-[400px] md:h-[500px]"
+          className="w-full max-w-4xl aspect-video rounded-xl overflow-hidden shadow-2xl"
           variants={fallIn}
         >
           <iframe
             src={videoSrc}
             title="Website Demo Video"
-            className="w-full h-full rounded-xl shadow-2xl pointer-events-none"
+            className="w-full h-full pointer-events-none"
             allow="autoplay; encrypted-media"
             allowFullScreen
           />
